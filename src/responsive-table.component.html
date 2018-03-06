@@ -1,0 +1,82 @@
+<div class="responsive-table-container">
+  <div class="row controls-bar " [hidden]="config.hideControlsBar" >
+    <div class="col-sm-3 m-b-xs" *ngIf="config.dateRange">
+      <div class="input-group date">
+        <span class="input-group-addon">
+          <i class="fa fa-calendar"></i>
+        </span>
+        <input  type="text" id="daterangeInput" class="input-sm form-control" name="daterangeInput" daterangepicker [options]="config.dateRange"
+          (selected)="selectedDate($event)" />
+      </div>
+    </div>
+    <div class="col-sm-2 m-b-xs">
+      <div class="input-group" *ngIf="config.search">
+        <span class="input-group-addon">
+          <i class="fa fa-search"></i>
+        </span>
+        <input type="text" placeholder="{{config.search.placeholder}}" class="input-sm form-control" [ngModel]="searchStr" (ngModelChange)="search($event)">
+      </div>
+    </div>
+    <div class="col-sm-5 m-b-xs" [ngClass]="{'col-sm-offset-3': !config.dateRange}">
+    </div>
+    <div class="col-sm-2">
+      <button *ngIf="config.actions.add" type="button" class="btn btn-block btn-sm btn-primary" (click)="config.actions.add.click()">
+        <i class="fa fa-plus button-icon"></i> {{config.actions.add.label}}</button>
+    </div>
+  </div>
+  <table class="responsive-table footable table table-striped toggle-arrow-tiny breakpoint" *ngIf="searchResult">
+    <thead>
+      <tr>
+        <th *ngFor="let column of config.columns | filterResponsive: [sizeCode, false]" [ngClass]="column.headerClass" (click)="sort(column.property)">
+          {{column.header}}
+          <i class="sort-icon fa" [ngClass]="{'fa-sort': column.property !== config.search_request_params.sort,
+          'fa-sort-down': column.property === '-' + config.search_request_params.sort,
+          'fa-sort-up': column.property === config.search_request_params.sort}"></i>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let element of searchResult.docs; index as i">
+        <tr [ngClass]="{'footable-even': i % 2 === 0, 'footable-odd': i % 2 === 1, 'selected': selectedElement === element }" (click)="selectedElement = selectedElement === element ? null : element ">
+          <td [ngClass]="column.class" *ngFor="let column of config.columns | filterResponsive: [sizeCode, false]; index as j">
+            <ng-container *ngIf="j === 0">
+              <i class="arrow-icon fa" [ngClass]="{'fa-angle-right': selectedElement !== element, 'fa-angle-down': selectedElement === element}"></i>
+            </ng-container>
+            <span *ngIf="!column.link">{{element | complexProperty: column.property | format: column.format }}</span>
+            <a [routerLink]="[column.link + '/' + element._id]" *ngIf="column.link">{{element | complexProperty: column.property | format: column.format }}</a>
+          </td>
+        </tr>
+        <tr class="footable-row-detail" *ngIf="selectedElement === element">
+          <td class="footable-row-detail-cell" colspan="5">
+            <div class="row">
+              <div class="col-sm-10">
+                <div class="footable-row-detail-inner">
+                  <div class="footable-row-detail-row" *ngFor="let column of config.columns | filterResponsive: [sizeCode, true]">
+                    <div class="footable-row-detail-name">{{column.header}}:</div>
+                    <div class="footable-row-detail-value">{{element | complexProperty: column.property | format: column.format}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2 action-controls">
+                <button type="button" class="btn btn-block btn-sm btn-outline btn-primary" (click)="config.actions.edit.click(element)">
+                  <i class="fa fa-edit button-icon"></i> {{config.actions.edit.label}}</button>
+                <button type="button" class="btn btn-block btn-sm btn-outline btn-danger" (click)="config.actions.remove.click(element)">
+                  <i class="fa fa-trash button-icon"></i> {{config.actions.remove.label}}</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td [colSpan]="sizeCode === 'xs' ? (config.columns | filterResponsive: [sizeCode, false]).length : (config.columns | filterResponsive: [sizeCode, false]).length"
+          class="footable-visible">
+          <div class="text-right">
+            <smart-responsive-table-pagination [searchResult]="searchResult" (pageUpdated)="updatePage($event)"></smart-responsive-table-pagination>
+          </div>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
