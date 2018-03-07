@@ -46,10 +46,10 @@ export * from './models/index';
     }
   ]
 })
-export class Ng2SmartResponsiveTable {
+export class Ng2SmartResponsiveTableModule {
   static forRoot(): ModuleWithProviders {
     return {
-      ngModule: Ng2SmartResponsiveTable,
+      ngModule: Ng2SmartResponsiveTableModule,
       providers: [
         HttpClient,
         ResponsiveService,
